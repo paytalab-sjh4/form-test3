@@ -2125,33 +2125,6 @@
                 }
             }
 
-            // 다음 단계
-            // 조건부 분기 처리
-            if (currentStep === 3) {
-                if (eventType === 'menu') {
-                    showStep(4);
-                } else if (eventType === 'coupon') {
-                    showStep(12);
-                }
-            } else if (currentStep === 5) {
-                if (discountType === 'amount') {
-                    showStep(6);
-                } else if (discountType === 'percent') {
-                    showStep(7);
-                }
-            } else {
-                showStep(currentStep + 1);
-            }
-
-            // 이전 단계
-            if (currentStep === 6 || currentStep === 7) {
-                showStep(5);
-            } else if (currentStep === 4 && eventType === 'menu') {
-                showStep(3);
-            } else {
-                showStep(currentStep - 1);
-            }
-
             // Step 6에서 Step 8로 건너뛰기
             function skipToStep8() {
                 if (!validateCurrentStep()) {
@@ -2159,14 +2132,6 @@
                 }
                 showStep(8);
             }
-
-            // 특정 단계 표시
-
-            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
-            currentStep = step;
-
-            // 진행률 업데이트
-            updateProgress();
 
             // 진행률 업데이트
             function updateProgress() {
@@ -2443,156 +2408,7 @@
                 return isValid;
             }
 
-            // 폼 제출
-            const submitBtn = document.querySelector('.btn-submit');
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-
-            // 폼 데이터 수집
-            const formData = {
-                timestamp: new Date().toLocaleString('ko-KR'),
-                storeName: document.getElementById('storeName').value,
-                ownerName: document.getElementById('ownerName').value,
-                phoneNumber: document.getElementById('phoneNumber').value,
-                eventType: eventType === 'menu' ? '메뉴 할인 이벤트' : '매장 쿠폰 이벤트',
-            };
-
-            // 이벤트 타입별 데이터 수집
-            if (eventType === 'menu') {
-                // 메뉴 목록
-                const menus = [];
-                for (let i = 1; i <= 10; i++) {
-                    const menu = document.querySelector(`input[name="menu${i}"]`)?.value;
-                    if (menu) menus.push(menu);
-                }
-                formData.menus = menus.join(', ');
-
-                // 할인 정보
-                formData.discountType = discountType === 'amount' ? '금액할인' : '정률할인';
-                if (discountType === 'amount') {
-                    formData.discountValue = document.getElementById('discountAmount').value + '원';
-                } else {
-                    formData.discountValue = document.getElementById('discountPercent').value + '%';
-                }
-
-                // 시간 정보
-                const allDayEvent = document.getElementById('allDayEvent').checked;
-                if (allDayEvent) {
-                    formData.eventTime = '영업시간 전체';
-                } else {
-                    formData.startTime = document.getElementById('startTime').value || '미설정';
-                    formData.endTime = document.getElementById('endTime').value || '미설정';
-                }
-
-                // 기간 정보
-                const alwaysEvent = document.getElementById('alwaysEvent').checked;
-                if (alwaysEvent) {
-                    formData.eventPeriod = '상시 진행';
-                } else {
-                    formData.eventStartDate = document.getElementById('eventStartDate').value;
-                    formData.eventEndDate = document.getElementById('eventEndDate').value;
-                }
-
-                // 구매 정책
-                formData.purchasePolicy =
-                    purchasePolicy === 'repeat'
-                        ? '반복 사용'
-                        : purchasePolicy === 'daily'
-                        ? '하루에 1번 사용'
-                        : '고객 당 1번 사용';
-
-                // 적립 여부
-                const hasReward = document.getElementById('hasRewardProgram').checked;
-                if (hasReward) {
-                    formData.rewardProgram = '적립 프로그램 있음';
-                    formData.rewardPolicy = rewardPolicy === 'yes' ? '적립 가능' : '적립 불가';
-                } else {
-                    formData.rewardProgram = '적립 프로그램 없음';
-                }
-            } else if (eventType === 'coupon') {
-                // 쿠폰 정보 수집
-                const coupons = [];
-                for (let i = 1; i <= couponCount; i++) {
-                    const couponAmount = document.getElementById(`couponAmount${i}`)?.value;
-                    const minOrderAmount = document.getElementById(`minOrderAmount${i}`)?.value;
-
-                    if (couponAmount) {
-                        coupons.push({
-                            amount: couponAmount + '원',
-                            minOrder: minOrderAmount ? minOrderAmount + '원' : '제한 없음',
-                        });
-                    }
-                }
-
-                formData.coupons = JSON.stringify(coupons);
-                formData.couponCount = coupons.length + '개';
-
-                // 쿠폰 이벤트 기간
-                const alwaysCouponEvent = document.getElementById('alwaysCouponEvent').checked;
-                if (alwaysCouponEvent) {
-                    formData.couponEventPeriod = '상시 진행';
-                } else {
-                    formData.couponStartDate = document.getElementById('couponStartDate').value;
-                    formData.couponEndDate = document.getElementById('couponEndDate').value;
-                }
-
-                // 쿠폰 유효기간
-                formData.couponValidity = couponValidity === '0' ? '당일' : couponValidity + '일';
-
-                // 쿠폰 구매 정책
-                formData.couponPurchasePolicy =
-                    couponPurchasePolicy === 'repeat'
-                        ? '반복 사용'
-                        : couponPurchasePolicy === 'daily'
-                        ? '하루에 1번 사용'
-                        : '고객 당 1번 사용';
-
-                // 쿠폰 적립 여부
-                const hasCouponReward = document.getElementById('couponHasRewardProgram').checked;
-                if (hasCouponReward) {
-                    formData.couponRewardProgram = '적립 프로그램 있음';
-                    formData.couponRewardPolicy = couponRewardPolicy === 'yes' ? '적립 가능' : '적립 불가';
-                } else {
-                    formData.couponRewardProgram = '적립 프로그램 없음';
-                }
-            }
-
-            try {
-                // 테스트용 콘솔 출력
-                console.log('제출된 데이터:', formData);
-
-                // 실제 Google Apps Script 전송 (주석 해제 필요)
-                /*
-                    const response = await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-                    */
-
-                // 성공 메시지 표시
-                setTimeout(() => {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-
-                    document.querySelector('.overlay').classList.add('show');
-                    document.querySelector('.success-message').classList.add('show');
-
-                    // 3초 후 페이지 새로고침
-                    setTimeout(() => {
-                        location.reload();
-                    }, 3000);
-                }, 1500);
-            } catch (error) {
-                console.error('Error:', error);
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-                alert('신청 중 오류가 발생했습니다. 다시 시도해주세요.');
-            }
-        </script>
+            </script>
 
         <!-- === Conflict-free GAS Sheet2 submit patch (menuConfirm → "메뉴 확인") === -->
         <script>
