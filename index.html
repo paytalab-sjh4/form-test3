@@ -1102,10 +1102,14 @@
         }
 
         // 이전 단계
-        function prevStep() {
-            if (currentStep === 6 || currentStep === 7) {
-                showStep(5);
-            } else if (currentStep === 4 && eventType === 'menu') {
+        
+function prevStep() {
+  const steps = Array.from(document.querySelectorAll('.step')).map(s => parseInt(String(s.dataset.step).trim(),10)).sort((a,b)=>a-b);
+  const idx = steps.indexOf(window.currentStep);
+  const prev = idx > 0 ? steps[idx - 1] : steps[0];
+  showStep(prev);
+}
+else if (currentStep === 4 && eventType === 'menu') {
                 showStep(3);
             } else {
                 showStep(currentStep - 1);
@@ -1121,10 +1125,39 @@
         }
 
         // 특정 단계 표시
-        function showStep(step) {
-            document.querySelectorAll('.step').forEach(s => {
-                s.classList.remove('active');
-            });
+        
+function showStep(step) {
+  try {
+    step = parseInt(step, 10);
+    const steps = Array.from(document.querySelectorAll('.step'));
+    // hide all
+    steps.forEach(s => s.classList.remove('active'));
+
+    // robust find (trimmed string or numeric compare)
+    let target = steps.find(s => String(s.dataset.step).trim() === String(step).trim());
+    if (!target) {
+      const candidates = steps
+        .map(s => parseInt(String(s.dataset.step).trim(), 10))
+        .filter(n => !isNaN(n))
+        .sort((a,b) => a - b);
+      console.warn('[showStep] target not found for', step, 'candidates=', candidates);
+      const fallback = candidates.includes(step)
+        ? step
+        : (candidates.find(n => n > step) ?? candidates[candidates.length - 1]);
+      target = steps.find(s => parseInt(String(s.dataset.step).trim(), 10) === fallback);
+      if (!target) return;
+      step = fallback;
+    }
+
+    target.classList.add('active');
+    window.currentStep = step;
+    updateProgress?.();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    console.error('[showStep] error:', e);
+  }
+}
+);
             
             document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
             currentStep = step;
