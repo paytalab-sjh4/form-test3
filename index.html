@@ -1122,16 +1122,8 @@
 
     <script>
         // Google Apps Script URL (실제 URL로 교체 필요)
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykfvpblcHEzXSlp1k-fPrRpHUat4PMedJomubyJciYM92-921nWazZ2ryCTJCKlFwxzg/exec';
-    const SHEET_NAME = 'Sheet3';
-        // 라디오 실제 선택값을 한글 라벨로 변환
-        function getEventTypeText() {
-            const v = (document.querySelector('input[name="eventType"]:checked')?.value || '').toLowerCase();
-            if (v === 'menu') return '메뉴 할인 이벤트';
-            if (v === 'coupon') return '매장 쿠폰 이벤트';
-            return '';
-        }
-
+        var GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+    window.GOOGLE_SCRIPT_URL = GOOGLE_SCRIPT_URL;
 
         let currentStep = 1;
         let totalSteps = 16;
@@ -2165,7 +2157,6 @@
 
         // 폼 제출
         async function submitForm() {
-            console.log('[DEBUG] submitForm() called');
             if (!validateCurrentStep()) {
                 return;
             }
@@ -2176,12 +2167,11 @@
 
             // 폼 데이터 수집
             const formData = {
-                sheetName: SHEET_NAME,
                 timestamp: new Date().toLocaleString('ko-KR'),
                 storeName: document.getElementById('storeName').value,
                 ownerName: document.getElementById('ownerName').value,
                 phoneNumber: document.getElementById('phoneNumber').value,
-                eventType: getEventTypeText()
+                eventType: eventType === 'menu' ? '메뉴 할인 이벤트' : '매장 쿠폰 이벤트'
             };
 
             // 이벤트 타입별 데이터 수집
@@ -2279,15 +2269,19 @@
 
             try {
                 // 테스트용 콘솔 출력
-                console.log('제출된 데이터:', formData); console.log('[DEBUG] Posting to:', GOOGLE_SCRIPT_URL);
+                console.log('제출된 데이터:', formData);
 
                 // 실제 Google Apps Script 전송 (주석 해제 필요)
+                /*
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify(formData)
                 });
+                */
 
                 // 성공 메시지 표시
                 setTimeout(() => {
@@ -2310,17 +2304,13 @@
                 alert('신청 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
         }
-    
-    window.addEventListener('error', (e) => { console.error('[GLOBAL ERROR]', e.error || e.message || e); });
-    window.addEventListener('unhandledrejection', (e) => { console.error('[UNHANDLED REJECTION]', e.reason || e); });
-
-</script>
+    </script>
 
 <!-- === Conflict-free GAS Sheet2 submit patch (menuConfirm → "메뉴 확인") === -->
 <script>
 (function() {
   // Use existing global if present, otherwise fallback to provided URL
-  const url = (window && window.GOOGLE_SCRIPT_URL) ? window.GOOGLE_SCRIPT_URL : "https://script.google.com/macros/s/AKfycbwp4fo-0wwr8xF1yuE2xz-TFeHm5u_wUqiACl5g05aPonrU2sKCyKFOncXtNvVCjYQXFA/exec";
+  const url = (window && window.GOOGLE_SCRIPT_URL) ? window.GOOGLE_SCRIPT_URL : GOOGLE_SCRIPT_URL;
 
   const firstVal = (selectors) => {
     for (const s of selectors) {
@@ -2353,7 +2343,6 @@
 
       // === Sheet2 header mapping ===
       out.set("제출 시간", new Date().toLocaleString("ko-KR"));
-      out.set("시트명", SHEET_NAME);
       out.set("안내사항 확인", firstChecked(["#agreeCheck","[name=agree]"]) ? "예" : "");
 
       out.set("매장명", firstVal(["#storeName","[name=storeName]"]));
@@ -2427,18 +2416,11 @@
       let crp = (typeof window!=="undefined" && window.couponRewardPolicy) ? window.couponRewardPolicy : firstVal(["#couponRewardPolicy","[name=couponRewardPolicy]"]);
       out.set("적립여부  - 쿠폰", mapReward(crp));
 
-      // URLSearchParams -> JSON payload
-      const payload = {};
-      out.forEach((value, key) => { payload[key] = value; });
-      // 보강: 통일된 키도 함께 포함
-      payload.sheetName = SHEET_NAME;
-      payload.eventType = getEventTypeText() || payload['이벤트 선택'] || payload['eventType'] || '';
-      console.log('[DEBUG] __sheet2Submit posting to:', url);
       await fetch(url, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: out.toString(),
       });
 
       try {
