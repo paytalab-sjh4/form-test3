@@ -1122,7 +1122,7 @@
 
     <script>
         // Google Apps Script URL (실제 URL로 교체 필요)
-        var GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykfvpblcHEzXSlp1k-fPrRpHUat4PMedJomubyJciYM92-921nWazZ2ryCTJCKlFwxzg/exec';
     window.GOOGLE_SCRIPT_URL = GOOGLE_SCRIPT_URL;
 
         let currentStep = 1;
@@ -2270,10 +2270,11 @@
             try {
                 // 테스트용 콘솔 출력
                 console.log('제출된 데이터:', formData);
+            console.log('[FINAL URL]', GOOGLE_SCRIPT_URL);
 
                 // 실제 Google Apps Script 전송 (주석 해제 필요)
                 /*
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?v=' + Date.now(), {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -2416,7 +2417,7 @@
       let crp = (typeof window!=="undefined" && window.couponRewardPolicy) ? window.couponRewardPolicy : firstVal(["#couponRewardPolicy","[name=couponRewardPolicy]"]);
       out.set("적립여부  - 쿠폰", mapReward(crp));
 
-      await fetch(url, {
+      await fetch(url + '?v=' + Date.now(), {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
