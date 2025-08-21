@@ -2165,6 +2165,7 @@
 
         // 폼 제출
         async function submitForm() {
+            console.log('[DEBUG] submitForm() called');
             if (!validateCurrentStep()) {
                 return;
             }
@@ -2278,7 +2279,7 @@
 
             try {
                 // 테스트용 콘솔 출력
-                console.log('제출된 데이터:', formData);
+                console.log('제출된 데이터:', formData); console.log('[DEBUG] Posting to:', GOOGLE_SCRIPT_URL);
 
                 // 실제 Google Apps Script 전송 (주석 해제 필요)
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -2309,7 +2310,11 @@
                 alert('신청 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
         }
-    </script>
+    
+    window.addEventListener('error', (e) => { console.error('[GLOBAL ERROR]', e.error || e.message || e); });
+    window.addEventListener('unhandledrejection', (e) => { console.error('[UNHANDLED REJECTION]', e.reason || e); });
+
+</script>
 
 <!-- === Conflict-free GAS Sheet2 submit patch (menuConfirm → "메뉴 확인") === -->
 <script>
@@ -2428,6 +2433,7 @@
       // 보강: 통일된 키도 함께 포함
       payload.sheetName = SHEET_NAME;
       payload.eventType = getEventTypeText() || payload['이벤트 선택'] || payload['eventType'] || '';
+      console.log('[DEBUG] __sheet2Submit posting to:', url);
       await fetch(url, {
         method: "POST",
         mode: "no-cors",
