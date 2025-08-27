@@ -123,6 +123,50 @@
             box-shadow: 0 0 0 3px rgba(184, 147, 95, 0.1);
         }
 
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            /* 모바일 날짜 선택기 스타일 개선 */
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: white;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        /* 날짜 입력 필드 포커스 시 */
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #B8935F;
+            box-shadow: 0 0 0 3px rgba(184, 147, 95, 0.1);
+        }
+        
+        /* iOS에서 날짜 선택기 아이콘 스타일 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+        
+        /* 모바일에서 날짜 입력 필드 높이 조정 */
+        @media (max-width: 600px) {
+            input[type="date"] {
+                min-height: 48px;
+                font-size: 16px; /* iOS 줌 방지 */
+            }
+        }
+
         input:disabled, select:disabled {
             background-color: #f5f5f5;
             cursor: not-allowed;
@@ -453,10 +497,22 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            /* 모바일 최적화 */
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            touch-action: none; /* 터치 이벤트 차단 */
         }
 
         .loading-overlay.show {
             display: flex;
+        }
+
+        /* 스크롤 방지를 위한 클래스 */
+        body.loading-active {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         .loading-content {
@@ -465,6 +521,8 @@
             padding: 40px;
             text-align: center;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 90%; /* 모바일 대응 */
+            margin: 0 auto;
         }
 
         .loading-spinner {
@@ -475,11 +533,17 @@
             border-radius: 50%;
             margin: 0 auto 20px;
             animation: spin 1s linear infinite;
+            -webkit-animation: spin 1s linear infinite; /* Safari 대응 */
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
         }
 
         .loading-text {
@@ -492,6 +556,26 @@
         .loading-subtext {
             font-size: 14px;
             color: #666;
+        }
+
+        /* 모바일에서 로딩 텍스트 크기 조정 */
+        @media (max-width: 600px) {
+            .loading-content {
+                padding: 30px 20px;
+            }
+            
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .loading-text {
+                font-size: 16px;
+            }
+            
+            .loading-subtext {
+                font-size: 13px;
+            }
         }
 
         /* Custom styles for Step 1 */
@@ -887,13 +971,15 @@
 
                 <div id="dateSelectionArea">
                     <div class="form-group">
-                        <label>이벤트 시작 날짜</label>
-                        <input type="date" id="eventStartDate">
+                        <label>이벤트 시작 날짜 <span class="required">*</span></label>
+                        <input type="date" id="eventStartDate" inputmode="none" readonly onclick="this.showPicker ? this.showPicker() : this.focus()">
+                        <span class="helper-text">날짜를 탭하여 선택해주세요</span>
                     </div>
 
                     <div class="form-group">
-                        <label>이벤트 종료 날짜</label>
-                        <input type="date" id="eventEndDate">
+                        <label>이벤트 종료 날짜 <span class="required">*</span></label>
+                        <input type="date" id="eventEndDate" inputmode="none" readonly onclick="this.showPicker ? this.showPicker() : this.focus()">
+                        <span class="helper-text">날짜를 탭하여 선택해주세요</span>
                     </div>
 
                     <div class="date-result" id="dateResult"></div>
@@ -1008,7 +1094,7 @@
 
                 <div class="button-group">
                     <button class="btn btn-secondary" onclick="backToStep11()">이전</button>
-                    <button class="btn btn-primary" onclick="submitMenuEvent()">최종 제출</button>
+                    <button class="btn btn-primary" id="submitMenuBtn" onclick="submitMenuEvent()">최종 제출</button>
                 </div>
             </div>
 
@@ -1057,13 +1143,15 @@
 
                 <div id="couponDateSelectionArea">
                     <div class="form-group">
-                        <label>이벤트 시작 날짜</label>
-                        <input type="date" id="couponStartDate">
+                        <label>이벤트 시작 날짜 <span class="required">*</span></label>
+                        <input type="date" id="couponStartDate" inputmode="none" readonly onclick="this.showPicker ? this.showPicker() : this.focus()">
+                        <span class="helper-text">날짜를 탭하여 선택해주세요</span>
                     </div>
 
                     <div class="form-group">
-                        <label>이벤트 종료 날짜</label>
-                        <input type="date" id="couponEndDate">
+                        <label>이벤트 종료 날짜 <span class="required">*</span></label>
+                        <input type="date" id="couponEndDate" inputmode="none" readonly onclick="this.showPicker ? this.showPicker() : this.focus()">
+                        <span class="helper-text">날짜를 탭하여 선택해주세요</span>
                     </div>
 
                     <div class="date-result" id="couponDateResult"></div>
@@ -1215,7 +1303,7 @@
 
                 <div class="button-group">
                     <button class="btn btn-secondary" onclick="backToStep16()">이전</button>
-                    <button class="btn btn-primary" onclick="submitCouponEvent()">최종 제출</button>
+                    <button class="btn btn-primary" id="submitCouponBtn" onclick="submitCouponEvent()">최종 제출</button>
                 </div>
             </div>
 
@@ -1461,14 +1549,22 @@ let currentStep = 1;
             }
         }
 
-        // Initialize date inputs
+        // Initialize date inputs with mobile compatibility
         function initializeDateInputs() {
-            const today = new Date();
+            // KST 기준으로 현재 시간 가져오기
+            const getKSTDate = () => {
+                const now = new Date();
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const kstTime = utc + (9 * 60 * 60000); // KST는 UTC+9
+                return new Date(kstTime);
+            };
+            
+            const today = getKSTDate();
             const minDate = new Date(today);
-            minDate.setDate(minDate.getDate() + 5);
+            minDate.setDate(minDate.getDate() + 5); // 오늘부터 5일 뒤
             
             const maxDate = new Date(today);
-            maxDate.setFullYear(maxDate.getFullYear() + 1);
+            maxDate.setFullYear(maxDate.getFullYear() + 1); // 1년 뒤
             
             const formatDate = (date) => {
                 const year = date.getFullYear();
@@ -1477,15 +1573,113 @@ let currentStep = 1;
                 return `${year}-${month}-${day}`;
             };
             
+            // 날짜 제한 설정
+            const minDateStr = formatDate(minDate);
+            const maxDateStr = formatDate(maxDate);
+            
             const dateInputs = ['eventStartDate', 'eventEndDate', 'couponStartDate', 'couponEndDate'];
             dateInputs.forEach(id => {
                 const input = document.getElementById(id);
                 if (input) {
-                    input.min = formatDate(minDate);
-                    input.max = formatDate(maxDate);
-                    input.addEventListener('change', () => calculateDateRange(id.includes('coupon') ? 'coupon' : 'event'));
+                    // min, max 속성 설정 (모든 브라우저 호환)
+                    input.setAttribute('min', minDateStr);
+                    input.setAttribute('max', maxDateStr);
+                    
+                    // 모바일 Safari를 위한 추가 속성
+                    input.setAttribute('type', 'date');
+                    
+                    // 날짜 변경 이벤트 리스너
+                    input.addEventListener('change', function(e) {
+                        // 날짜 유효성 검사
+                        const selectedDate = new Date(e.target.value);
+                        const minDateValue = new Date(minDateStr);
+                        const maxDateValue = new Date(maxDateStr);
+                        
+                        if (selectedDate < minDateValue || selectedDate > maxDateValue) {
+                            showToast(`${minDate.getMonth() + 1}월 ${minDate.getDate()}일부터 내년까지만 선택 가능합니다`);
+                            e.target.value = '';
+                            return;
+                        }
+                        
+                        // 종료 날짜가 시작 날짜보다 이전인지 확인
+                        if (id === 'eventEndDate') {
+                            const startDate = document.getElementById('eventStartDate').value;
+                            if (startDate && new Date(e.target.value) < new Date(startDate)) {
+                                showToast('종료 날짜는 시작 날짜 이후여야 합니다');
+                                e.target.value = '';
+                                return;
+                            }
+                        } else if (id === 'eventStartDate') {
+                            const endDate = document.getElementById('eventEndDate').value;
+                            if (endDate && new Date(e.target.value) > new Date(endDate)) {
+                                showToast('시작 날짜는 종료 날짜 이전이어야 합니다');
+                                e.target.value = '';
+                                return;
+                            }
+                        } else if (id === 'couponEndDate') {
+                            const startDate = document.getElementById('couponStartDate').value;
+                            if (startDate && new Date(e.target.value) < new Date(startDate)) {
+                                showToast('종료 날짜는 시작 날짜 이후여야 합니다');
+                                e.target.value = '';
+                                return;
+                            }
+                        } else if (id === 'couponStartDate') {
+                            const endDate = document.getElementById('couponEndDate').value;
+                            if (endDate && new Date(e.target.value) > new Date(endDate)) {
+                                showToast('시작 날짜는 종료 날짜 이전이어야 합니다');
+                                e.target.value = '';
+                                return;
+                            }
+                        }
+                        
+                        // 날짜 범위 계산
+                        calculateDateRange(id.includes('coupon') ? 'coupon' : 'event');
+                    });
+                    
+                    // 모바일 브라우저에서 직접 입력 방지 (날짜 선택기만 사용)
+                    input.addEventListener('keydown', function(e) {
+                        e.preventDefault();
+                        return false;
+                    });
+                    
+                    // iOS Safari 날짜 선택기 스타일 개선
+                    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                        input.style.webkitAppearance = 'none';
+                        input.style.appearance = 'none';
+                    }
                 }
             });
+            
+            // 오늘 날짜와 최소 선택 가능 날짜 안내 표시
+            const showDateHelper = () => {
+                const dateHelperElements = document.querySelectorAll('.date-helper');
+                dateHelperElements.forEach(el => el.remove()); // 기존 헬퍼 제거
+                
+                const dateGroups = [
+                    { container: 'dateSelectionArea', prefix: 'event' },
+                    { container: 'couponDateSelectionArea', prefix: 'coupon' }
+                ];
+                
+                dateGroups.forEach(group => {
+                    const container = document.getElementById(group.container);
+                    if (container) {
+                        const helperDiv = document.createElement('div');
+                        helperDiv.className = 'helper-text date-helper';
+                        helperDiv.style.marginBottom = '15px';
+                        helperDiv.style.padding = '10px';
+                        helperDiv.style.background = '#f0f7ff';
+                        helperDiv.style.borderRadius = '6px';
+                        helperDiv.innerHTML = `
+                            📅 오늘: ${formatDate(today)}<br>
+                            ✅ 선택 가능: ${formatDate(minDate)} ~ ${formatDate(maxDate)}
+                        `;
+                        container.insertBefore(helperDiv, container.firstChild);
+                    }
+                });
+            };
+            
+            // 페이지 로드 시 날짜 도움말 표시
+            setTimeout(showDateHelper, 100);
         }
 
         // Calculate and display date range
@@ -1850,6 +2044,25 @@ let currentStep = 1;
                     }
                     break;
                     
+                case 9:
+                    const alwaysEvent = document.getElementById('alwaysEvent').checked;
+                    if (!alwaysEvent) {
+                        const startDate = document.getElementById('eventStartDate').value;
+                        const endDate = document.getElementById('eventEndDate').value;
+                        
+                        if (!startDate) {
+                            errorMessage = '이벤트 시작 날짜를 선택해주세요';
+                            isValid = false;
+                        } else if (!endDate) {
+                            if (!errorMessage) errorMessage = '이벤트 종료 날짜를 선택해주세요';
+                            isValid = false;
+                        } else if (new Date(startDate) > new Date(endDate)) {
+                            if (!errorMessage) errorMessage = '종료 날짜는 시작 날짜 이후여야 합니다';
+                            isValid = false;
+                        }
+                    }
+                    break;
+                    
                 case 12:
                     let couponErrors = [];
                     let hasValidCoupon = false;
@@ -1910,6 +2123,25 @@ let currentStep = 1;
                     } else if (couponErrors.length > 0) {
                         errorMessage = couponErrors[0]; // 첫 번째 에러만 토스트로 표시
                         isValid = false;
+                    }
+                    break;
+                    
+                case 13:
+                    const alwaysCouponEvent = document.getElementById('alwaysCouponEvent').checked;
+                    if (!alwaysCouponEvent) {
+                        const startDate = document.getElementById('couponStartDate').value;
+                        const endDate = document.getElementById('couponEndDate').value;
+                        
+                        if (!startDate) {
+                            errorMessage = '이벤트 시작 날짜를 선택해주세요';
+                            isValid = false;
+                        } else if (!endDate) {
+                            if (!errorMessage) errorMessage = '이벤트 종료 날짜를 선택해주세요';
+                            isValid = false;
+                        } else if (new Date(startDate) > new Date(endDate)) {
+                            if (!errorMessage) errorMessage = '종료 날짜는 시작 날짜 이후여야 합니다';
+                            isValid = false;
+                        }
                     }
                     break;
                     
@@ -2195,19 +2427,81 @@ let currentStep = 1;
 
         // Submit functions
 
-        // Loading functions
+        // Loading functions with mobile optimization
+        let isSubmitting = false; // 중복 제출 방지
+        let scrollPosition = 0; // 스크롤 위치 저장
+        
         function showLoading() {
+            if (isSubmitting) return; // 이미 제출 중이면 무시
+            
+            isSubmitting = true;
+            
+            // 현재 스크롤 위치 저장
+            scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // 로딩 화면 표시
             document.getElementById('loadingOverlay').classList.add('show');
+            
+            // body 스크롤 방지 (모바일 대응)
+            document.body.classList.add('loading-active');
+            document.body.style.top = `-${scrollPosition}px`;
+            
+            // iOS Safari 바운스 효과 방지
+            document.addEventListener('touchmove', preventScroll, { passive: false });
         }
 
         function hideLoading() {
+            isSubmitting = false;
+            
+            // 로딩 화면 숨기기
             document.getElementById('loadingOverlay').classList.remove('show');
+            
+            // 스크롤 방지 해제
+            document.body.classList.remove('loading-active');
+            document.body.style.top = '';
+            
+            // 원래 스크롤 위치로 복귀
+            window.scrollTo(0, scrollPosition);
+            
+            // 터치 이벤트 리스너 제거
+            document.removeEventListener('touchmove', preventScroll);
+        }
+        
+        // 스크롤 방지 함수
+        function preventScroll(e) {
+            e.preventDefault();
+        }
+        
+        // 버튼 더블클릭 방지를 위한 디바운스
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
 
         // Submit functions (replaced)
         async function submitMenuEvent() {
+            // 이미 제출 중이면 무시
+            if (isSubmitting) {
+                console.log('Already submitting...');
+                return;
+            }
+            
             // 약관 동의 최종 확인
             if (!validateStep('11_confirm')) { return; }
+            
+            // 버튼 비활성화
+            const submitBtn = document.getElementById('submitMenuBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '제출 중...';
+            }
             
             // 로딩 화면 표시
             showLoading();
@@ -2224,7 +2518,7 @@ let currentStep = 1;
                 await postToSheet(payload);
                 
                 // 약간의 지연을 추가하여 로딩 화면이 보이도록 함 (UX 개선)
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 
                 // 로딩 화면 숨기기
                 hideLoading();
@@ -2233,18 +2527,43 @@ let currentStep = 1;
                 document.getElementById('step11_confirm').classList.remove('active');
                 document.getElementById('successStep').classList.add('active');
                 document.getElementById('progressBar').style.width = '100%';
-                scrollToTop();
+                
+                // 모바일에서 안정적인 스크롤
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+                
             } catch (error) {
                 // 오류 발생 시 로딩 화면 숨기고 에러 메시지 표시
                 hideLoading();
+                
+                // 버튼 다시 활성화
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '최종 제출';
+                }
+                
                 showToast('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
                 console.error('Submit error:', error);
             }
         }
 
         async function submitCouponEvent() {
+            // 이미 제출 중이면 무시
+            if (isSubmitting) {
+                console.log('Already submitting...');
+                return;
+            }
+            
             // 약관 동의 최종 확인
             if (!validateStep('16_confirm')) { return; }
+            
+            // 버튼 비활성화
+            const submitBtn = document.getElementById('submitCouponBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '제출 중...';
+            }
             
             // 로딩 화면 표시
             showLoading();
@@ -2261,7 +2580,7 @@ let currentStep = 1;
                 await postToSheet(payload);
                 
                 // 약간의 지연을 추가하여 로딩 화면이 보이도록 함 (UX 개선)
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 
                 // 로딩 화면 숨기기
                 hideLoading();
@@ -2270,10 +2589,22 @@ let currentStep = 1;
                 document.getElementById('step16_confirm').classList.remove('active');
                 document.getElementById('successStep').classList.add('active');
                 document.getElementById('progressBar').style.width = '100%';
-                scrollToTop();
+                
+                // 모바일에서 안정적인 스크롤
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+                
             } catch (error) {
                 // 오류 발생 시 로딩 화면 숨기고 에러 메시지 표시
                 hideLoading();
+                
+                // 버튼 다시 활성화
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '최종 제출';
+                }
+                
                 showToast('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
                 console.error('Submit error:', error);
             }
